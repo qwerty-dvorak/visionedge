@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff8a70",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#1a0f0d",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .dot-matrix {
+            background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Header / Logo Area -->
+<header class="flex items-center p-6 justify-between border-b border-primary/10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">visibility</span>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold tracking-tight">VisionEdge</h2>
+</div>
+<div class="size-2 rounded-full bg-primary animate-pulse"></div>
+</header>
+<!-- Hero Section -->
+<main class="flex-1 flex flex-col px-6 pt-10 pb-8 max-w-lg mx-auto w-full">
+<!-- Hero Visual -->
+<div class="relative w-full aspect-square max-h-[300px] mb-10 flex items-center justify-center">
+<div class="absolute inset-0 bg-primary/5 rounded-full blur-3xl"></div>
+<!-- Large Nothing-inspired Eye Icon -->
+<div class="relative border-[1px] border-primary/20 rounded-full p-12 dot-matrix text-primary/10">
+<div class="bg-background-dark border-2 border-primary rounded-full p-8 shadow-[0_0_40px_rgba(255,138,112,0.2)]">
+<span class="material-symbols-outlined text-primary text-[80px] leading-none">lens_blur</span>
+</div>
+</div>
+</div>
+<div class="text-center mb-10">
+<h1 class="text-slate-900 dark:text-slate-100 text-4xl font-bold leading-tight mb-4 tracking-tight">
+                    Empowering <br/><span class="text-primary italic">Your Vision</span>
+</h1>
+<p class="text-slate-600 dark:text-primary/60 text-base">
+                    AI-powered visual assistance designed for independence.
+                </p>
+</div>
+<!-- Features List -->
+<div class="space-y-4 mb-12">
+<!-- Feature 1 -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-slate-100 dark:bg-primary/5 border border-transparent dark:border-primary/10 transition-all">
+<div class="flex items-center justify-center rounded-lg bg-primary/20 text-primary shrink-0 size-12">
+<span class="material-symbols-outlined text-2xl">center_focus_weak</span>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold">Identify Objects</p>
+<p class="text-slate-500 dark:text-primary/40 text-sm">Recognize everyday items instantly</p>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-slate-100 dark:bg-primary/5 border border-transparent dark:border-primary/10">
+<div class="flex items-center justify-center rounded-lg bg-primary/20 text-primary shrink-0 size-12">
+<span class="material-symbols-outlined text-2xl">text_fields</span>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold">Read Text</p>
+<p class="text-slate-500 dark:text-primary/40 text-sm">Convert printed text to speech</p>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-slate-100 dark:bg-primary/5 border border-transparent dark:border-primary/10">
+<div class="flex items-center justify-center rounded-lg bg-primary/20 text-primary shrink-0 size-12">
+<span class="material-symbols-outlined text-2xl">palette</span>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold">Color Detection</p>
+<p class="text-slate-500 dark:text-primary/40 text-sm">Accurately identify shades and tones</p>
+</div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="mt-auto space-y-6">
+<button class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold text-lg py-5 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-3">
+<span class="material-symbols-outlined font-bold">photo_camera</span>
+                    Grant Camera Access
+                </button>
+<div class="text-center">
+<p class="text-xs text-slate-500 dark:text-primary/30 uppercase tracking-[0.2em] font-medium">
+                        Your privacy is our priority
+                    </p>
+<a class="inline-block mt-2 text-primary text-sm font-medium hover:underline underline-offset-4" href="#">
+                        View Privacy Policy
+                    </a>
+</div>
+</div>
+</main>
+<!-- Footer / Progress Decoration -->
+<footer class="p-6 flex justify-center gap-2">
+<div class="h-1 w-8 rounded-full bg-primary"></div>
+<div class="h-1 w-2 rounded-full bg-primary/20"></div>
+<div class="h-1 w-2 rounded-full bg-primary/20"></div>
+</footer>
+</div>
+</body></html>

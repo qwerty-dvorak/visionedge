@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VisionEdge Debug Summary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff8a70",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#1a0f0d",
+                        "surface-dark": "#2d1b17",
+                        "accent-green": "#a3e635",
+                        "accent-red": "#fb7185",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .dot-matrix {
+            background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+            background-size: 12px 12px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between px-6 py-6 border-b border-primary/10">
+<div class="flex items-center gap-4">
+<div class="p-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-2xl">analytics</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight uppercase italic">VisionEdge <span class="text-primary">Debug</span></h1>
+<p class="text-xs text-slate-500 dark:text-primary/60 font-medium">ENGINE_V2.0.4_STABLE</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-3 rounded-full bg-surface-dark border border-primary/20 text-slate-100">
+<span class="material-symbols-outlined leading-none">terminal</span>
+</button>
+<button class="p-3 rounded-full bg-primary text-background-dark">
+<span class="material-symbols-outlined leading-none font-bold">bug_report</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-32">
+<!-- Performance Metrics -->
+<div class="grid grid-cols-3 gap-3 p-4">
+<div class="flex flex-col gap-1 rounded-xl p-5 bg-surface-dark border border-primary/5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl">speed</span>
+</div>
+<p class="text-primary/60 text-xs font-bold uppercase tracking-widest">FPS</p>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-bold leading-tight">120</p>
+<p class="text-accent-green text-xs font-bold leading-normal">+2.4%</p>
+</div>
+<div class="mt-2 h-1 w-full bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-4/5"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-xl p-5 bg-surface-dark border border-primary/5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl">timer</span>
+</div>
+<p class="text-primary/60 text-xs font-bold uppercase tracking-widest">Latency</p>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-bold leading-tight">8.2<span class="text-sm font-normal text-primary/40">ms</span></p>
+<p class="text-accent-red text-xs font-bold leading-normal">-0.5</p>
+</div>
+<div class="mt-2 h-1 w-full bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/3"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-xl p-5 bg-surface-dark border border-primary/5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl">reorder</span>
+</div>
+<p class="text-primary/60 text-xs font-bold uppercase tracking-widest">Queue</p>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-bold leading-tight">2</p>
+<p class="text-slate-500 text-xs font-bold leading-normal">STABLE</p>
+</div>
+<div class="mt-2 h-1 w-full bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/6"></div>
+</div>
+</div>
+</div>
+<!-- Frame Preview Area -->
+<div class="px-4 pb-4">
+<div class="relative rounded-xl overflow-hidden bg-black aspect-video border border-primary/20">
+<div class="absolute inset-0 dot-matrix text-primary/10 pointer-events-none"></div>
+<img class="w-full h-full object-cover opacity-60 mix-blend-screen" data-alt="Abstract 3D wireframe render with neon lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDILcMeiZGYK4KxsaJyuMM5QCy3ywFjTKgrX-OtPyBdNou85ly5fpJjvyU8UjWvXmw3tYnjI94itjupw-kI1OFqUYEVF9fUKFwZ3gMVIfhl7f3bq9sYJ0vV2ZzNI0rSyy3ASYirBan-RN2aJyH6KzXwM5VnDRwLO0RqbdQX35KpRor_UR8Ayj_TXO4MH8ez3xls8sEEWpdrYcKYI3s0hKxIa8AuJOMniWfqhaGyTYxQBtQ_Y2PmQiAoTG9bb2G3_CTUlK3QAjpISOdn"/>
+<!-- HUD Overlay -->
+<div class="absolute inset-0 p-4 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="bg-black/60 backdrop-blur-md px-3 py-1 rounded border border-primary/30">
+<p class="text-[10px] font-mono text-primary uppercase">Raw Capture: Active</p>
+</div>
+<div class="flex flex-col items-end font-mono text-[10px] text-primary/80">
+<p>X: 192.44</p>
+<p>Y: 842.01</p>
+<p>Z: -12.33</p>
+</div>
+</div>
+<div class="flex justify-center">
+<div class="w-16 h-16 border border-primary/40 rounded-full flex items-center justify-center">
+<div class="w-1 h-1 bg-primary rounded-full"></div>
+</div>
+</div>
+<div class="bg-black/40 backdrop-blur-sm p-2 border-t border-primary/20">
+<p class="text-[10px] font-mono text-white/70">Frame Buffer: 0x82...A1 | UV Map: Enabled | Vertex Count: 1.2M</p>
+</div>
+</div>
+</div>
+</div>
+<!-- System State Details -->
+<div class="px-4 space-y-4">
+<div class="bg-surface-dark/50 rounded-xl p-6 border border-primary/5">
+<h3 class="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">settings_input_component</span>
+                    System State
+                </h3>
+<div class="space-y-3">
+<div class="flex justify-between items-center py-2 border-b border-primary/5">
+<span class="text-slate-400 text-sm">Engine Status</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
+<span class="text-slate-100 text-sm font-medium">Active (Production)</span>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-primary/5">
+<span class="text-slate-400 text-sm">Scene Hash</span>
+<span class="text-primary font-mono text-xs bg-primary/5 px-2 py-1 rounded">0x7F2A9B1C</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-primary/5">
+<span class="text-slate-400 text-sm">VRAM Usage</span>
+<div class="text-right">
+<p class="text-slate-100 text-sm font-medium">428MB / 2.0GB</p>
+<div class="w-24 h-1 bg-primary/10 rounded-full mt-1 ml-auto">
+<div class="h-full bg-primary w-1/5"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="text-slate-400 text-sm">Shaders Loaded</span>
+<span class="text-slate-100 text-sm font-medium">1,244</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Toggles -->
+<div class="px-4 py-6">
+<h3 class="text-sm font-bold uppercase tracking-widest text-primary/60 mb-4 px-2">Active Settings</h3>
+<div class="flex flex-wrap gap-2">
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-background-dark font-bold text-xs">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                    WIREFRAME
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-bold text-xs">
+<span class="material-symbols-outlined text-sm">layers</span>
+                    OCCLUSION
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-background-dark font-bold text-xs">
+<span class="material-symbols-outlined text-sm">grid_view</span>
+                    GIZMOS
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-bold text-xs">
+<span class="material-symbols-outlined text-sm">light_mode</span>
+                    PBR_LIGHT
+                </button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-background-dark/80 backdrop-blur-xl border-t border-primary/20 px-6 pb-8 pt-4">
+<div class="max-w-md mx-auto flex items-center justify-between">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-2xl font-fill">monitor</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/40" href="#">
+<span class="material-symbols-outlined text-2xl">memory</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Hardware</span>
+</a>
+<div class="relative -mt-12">
+<button class="size-14 rounded-full bg-primary text-background-dark flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-3xl font-bold">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-primary/40" href="#">
+<span class="material-symbols-outlined text-2xl">list_alt</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Logs</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/40" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Config</span>
+</a>
+</div>
+</nav>
+</body></html>
