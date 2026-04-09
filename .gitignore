@@ -2,6 +2,10 @@
 
 # dependencies
 node_modules/
+.codex
+.mplconfig/
+.yolo-config/
+__MACOSX/
 
 # Expo
 .expo/
@@ -31,6 +35,8 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.local
 .env*.local
 
 # typescript
@@ -39,3 +45,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+#models 
+*.pt 
+*.tflite
+models/

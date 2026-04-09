@@ -1,142 +1,85 @@
-export type AppTab = 'home' | 'summary' | 'settings';
+import { IconKey } from "../constants/theme";
 
-export type AppScreen = 'onboarding' | AppTab;
-
-export type BannerTone = 'neutral' | 'success' | 'warning' | 'danger';
-
-export type NarrationStatus = 'idle' | 'narrating' | 'paused' | 'muted';
-
-export type PermissionStatus = 'granted' | 'pending' | 'denied';
-
-export type VerbosityLevel = 'concise' | 'balanced' | 'detailed';
-
-export type AudioOutputMode = 'speaker' | 'earpiece' | 'bluetooth';
+export type AppTab = "home" | "summary" | "settings";
+export type AppMode = "idle" | "initializing" | "active" | "paused" | "error";
+export type VerbosityLevel = "minimal" | "standard" | "detailed";
+export type AudioOutputMode = "speaker" | "earpiece" | "bluetooth";
 
 export interface DetectedObject {
   id: string;
   label: string;
-  icon: string;
+  icon: IconKey;
   confidence: number;
-  distanceMeters: number;
-  position: string;
-  priority: 'high' | 'medium' | 'low';
+  positionLabel: string;
+  distanceEstimateMeters?: number;
+  priority: "high" | "medium" | "low";
   quantity?: number;
 }
 
-export interface SceneSnapshot {
-  id: string;
-  title: string;
+export interface DetectionResult {
   summary: string;
-  latencyMs: number;
-  visibleCount: number;
   lowLight: boolean;
-  lowConfidence: boolean;
-  motionLevel: 'low' | 'moderate' | 'high';
-  confidenceLabel: string;
-  narrationStatus: NarrationStatus;
-  updatedAtLabel: string;
+  backend: "local-tflite" | "local-simulated" | "gemini-fallback";
+  sceneHash: string;
+  inferenceTimeMs: number;
+  capturedAt: number;
   objects: DetectedObject[];
 }
 
-export interface StatusBannerData {
-  id: string;
-  tone: BannerTone;
-  icon: string;
-  title: string;
-  message: string;
-}
-
-export interface QuickAction {
-  id: string;
-  label: string;
-  icon: string;
-  active?: boolean;
-  emphasized?: boolean;
-}
-
-export interface SummaryMetric {
-  id: string;
-  label: string;
-  value: string;
-  delta: string;
-  trend: 'up' | 'down' | 'stable';
-  icon: string;
-  progress: number;
-}
-
-export interface ActiveSettingChip {
-  id: string;
-  label: string;
-  icon: string;
-  enabled: boolean;
-}
-
-export interface SessionSummary {
-  lastSpokenPhrase: string;
-  sceneHash: string;
-  engineStatus: string;
-  vramUsageLabel: string;
-  shaderCountLabel: string;
-  frameBufferLabel: string;
-  coordinates: {
-    x: string;
-    y: string;
-    z: string;
-  };
-  metrics: SummaryMetric[];
-  activeSettings: ActiveSettingChip[];
-}
-
-export interface SettingsState {
+export interface AppSettings {
   speechRate: number;
-  voice: string;
   verbosity: VerbosityLevel;
-  confidenceThreshold: number;
+  audioOutputMode: AudioOutputMode;
   vibrationEnabled: boolean;
   lowLightAlertsEnabled: boolean;
-  translationEnabled: boolean;
-  audioOutputMode: AudioOutputMode;
-  offlineModeLabel: string;
-  privacySummary: string;
-  modelInfoLabel: string;
+  geminiFallbackEnabled: boolean;
+  confirmActions: boolean;
+  debugMode: boolean;
 }
 
-export interface SettingCardAction {
+export interface SessionMetrics {
+  framesCaptured: number;
+  lastCaptureAt: number | null;
+  lastNarrationAt: number | null;
+  avgLatencyMs: number;
+  lastInferenceMs: number;
+  totalNarrations: number;
+  queueDepth: number;
+  activeBackend: DetectionResult["backend"];
+}
+
+export interface ModelMetadata {
   id: string;
-  label: string;
-  description: string;
-  icon: string;
-  value?: string;
-  type: 'navigation' | 'toggle' | 'info';
-  enabled?: boolean;
+  modelType: "VISION" | "TTS";
+  modelVersion: string;
+  quantizationType: string;
+  status?: "ready" | "missing" | "disabled" | "error";
+  runtime?: "bundled" | "system" | "remote" | "simulated";
+  details?: string;
+  assetPath?: string | null;
+  loadTimeMs?: number | null;
 }
 
-export interface OnboardingFeature {
+export interface NarrationEvent {
+  shouldSpeak: boolean;
+  text: string | null;
+  reason: "scene-changed" | "scene-unchanged" | "interval-refresh" | "low-light";
+}
+
+export interface DemoSceneFixture {
   id: string;
-  title: string;
-  description: string;
-  icon: string;
+  summary: string;
+  lowLight: boolean;
+  objects: DetectedObject[];
 }
 
-export interface PermissionCardData {
-  title: string;
-  description: string;
-  privacyNote: string;
-  status: PermissionStatus;
-  ctaLabel: string;
-}
-
-export interface Milestone2MockData {
-  appName: string;
-  heroTitle: string;
-  heroSubtitle: string;
-  currentScreen: AppScreen;
-  statusBanner: StatusBannerData;
-  quickActions: QuickAction[];
-  onboardingFeatures: OnboardingFeature[];
-  permissionCard: PermissionCardData;
-  scene: SceneSnapshot;
-  summary: SessionSummary;
-  settings: SettingsState;
-  systemActions: SettingCardAction[];
+export interface GeminiSceneResponse {
+  summary: string;
+  lowLight: boolean;
+  objects: Array<{
+    label: string;
+    confidence: number;
+    positionLabel: string;
+    distanceEstimateMeters?: number;
+  }>;
 }
