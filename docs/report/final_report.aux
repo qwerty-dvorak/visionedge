@@ -1,0 +1,117 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Project Context from SRS and SDS}{1}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Requirements Baseline}{1}{subsection.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Design Baseline}{1}{subsection.6}\protected@file@percent }
+\citation{tan2020efficientdet}
+\citation{xiong2021mobiledets}
+\citation{zhao2024rtdetr}
+\citation{cheng2024yoloworld}
+\citation{wang2024yolov10}
+\citation{li2024unimode}
+\citation{ren2021fastspeech2}
+\citation{mehta2024matchatts}
+\citation{dang2024livespeech}
+\citation{guo2024flytts}
+\citation{vecino2023lightweighttts}
+\citation{alrazgan2021slr}
+\citation{takizawa2017spotreminder}
+\citation{lin2017guidingsystem}
+\citation{islam2023environmentdescription}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Problem Statement}{2}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Objectives}{2}{section.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}Literature Survey}{2}{section.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Mobile and Real-Time Object Detection}{2}{subsection.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Distance and Scene Geometry}{2}{subsection.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Fast and Lightweight Text-to-Speech}{2}{subsection.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Assistive and Usability Literature}{2}{subsection.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Why the Current Architecture Uses VisionCamera and JSI}{3}{section.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Architecture Choice Rationale}{3}{subsection.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VII}System Overview}{3}{section.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Planned Logical Pipeline}{3}{subsection.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Current Implemented Pipeline}{3}{subsection.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Repository and Module Mapping}{3}{section.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-A}}Top-Level Runtime Modules}{3}{subsection.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Planned vs Actual Module Correspondence}{3}{subsection.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Model and Runtime Design}{3}{section.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-A}}Bundled Vision Model}{3}{subsection.43}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Top-level runtime modules in the current VisionEdge implementation.}}{4}{table.38}\protected@file@percent }
+\newlabel{tab:runtimemodules}{{I}{4}{Top-level runtime modules in the current VisionEdge implementation}{table.38}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Conceptual mapping between the SDS design and the implemented repository modules.}}{4}{table.41}\protected@file@percent }
+\newlabel{tab:modulemapping}{{II}{4}{Conceptual mapping between the SDS design and the implemented repository modules}{table.41}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-B}}Why YOLO26s Was Chosen}{4}{subsection.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-C}}Current Distance Estimation Strategy}{4}{subsection.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {X}Database and Persistent State}{4}{section.46}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Current persistent state used by VisionEdge.}}{5}{table.48}\protected@file@percent }
+\newlabel{tab:dbschema}{{III}{5}{Current persistent state used by VisionEdge}{table.48}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {XI}Requirement Traceability}{5}{section.49}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {XII}Implementation Details}{5}{section.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XII-A}}Camera and Frame Pipeline}{5}{subsection.53}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XII-B}}Detection Parsing}{5}{subsection.54}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XII-C}}Speech and Narration}{5}{subsection.55}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XII-D}}UI Responsiveness Improvements}{5}{subsection.56}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Current manual test status derived from the VisionEdge device test report.}}{5}{figure.64}\protected@file@percent }
+\newlabel{fig:teststatus}{{1}{5}{Current manual test status derived from the VisionEdge device test report}{figure.64}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {XIII}Testing Methodology}{5}{section.57}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIII-A}}Automated Testing Tools}{5}{subsection.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIII-B}}Automated Validation Results}{5}{subsection.59}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIII-C}}Manual Test Suite Baseline}{5}{subsection.62}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Traceability between SRS requirements and the current implementation state.}}{6}{table.51}\protected@file@percent }
+\newlabel{tab:traceability}{{IV}{6}{Traceability between SRS requirements and the current implementation state}{table.51}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Current repeatable engineering checks.}}{6}{table.61}\protected@file@percent }
+\newlabel{tab:engchecks}{{V}{6}{Current repeatable engineering checks}{table.61}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIII-D}}Module-Wise Test Distribution}{6}{subsection.65}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIII-E}}Representative Manual Cases}{6}{subsection.68}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {XIV}Physical Device Validation}{6}{section.71}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIV-A}}Reference Device}{6}{subsection.72}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIV-B}}Observed Runtime Evidence}{6}{subsection.73}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Current 39-case distribution summarized by test module.}}{6}{table.67}\protected@file@percent }
+\newlabel{tab:moduletestsummary}{{VI}{6}{Current 39-case distribution summarized by test module}{table.67}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Representative manual cases from the current 39-case execution matrix. The full matrix is maintained in \texttt  {docs/VisionEdge\_TestReport.md}.}}{7}{table.70}\protected@file@percent }
+\newlabel{tab:manualcases}{{VII}{7}{Representative manual cases from the current 39-case execution matrix. The full matrix is maintained in \texttt {docs/VisionEdge\_TestReport.md}}{table.70}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIV-C}}A Practical Engineering Finding}{7}{subsection.74}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Current verified project measurements and counts.}}{7}{table.78}\protected@file@percent }
+\newlabel{tab:metrics}{{VIII}{7}{Current verified project measurements and counts}{table.78}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {XV}Results and Discussion}{7}{section.75}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XV-A}}Verified Quantitative Evidence}{7}{subsection.76}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XV-B}}Interpretation}{7}{subsection.79}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {XVI}Screenshots and Visual Evidence}{8}{section.84}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {XVII}Gap Analysis: Planned Design vs Current Reality}{8}{section.95}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XVII-A}}What Is Fully Aligned}{8}{subsection.96}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XVII-B}}What Changed in the Concrete Implementation}{8}{subsection.97}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XVII-C}}What Is Still Incomplete}{8}{subsection.98}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {XVIII}Risk Assessment}{8}{section.99}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {XIX}Future Work}{8}{section.102}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Key technical and validation risks in the current project state.}}{8}{table.101}\protected@file@percent }
+\newlabel{tab:risk}{{IX}{8}{Key technical and validation risks in the current project state}{table.101}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {XX}Conclusion}{8}{section.110}\protected@file@percent }
+\bibcite{tan2020efficientdet}{1}
+\bibcite{xiong2021mobiledets}{2}
+\bibcite{ren2021fastspeech2}{3}
+\bibcite{mehta2024matchatts}{4}
+\bibcite{dang2024livespeech}{5}
+\bibcite{guo2024flytts}{6}
+\bibcite{vecino2023lightweighttts}{7}
+\bibcite{zhao2024rtdetr}{8}
+\bibcite{cheng2024yoloworld}{9}
+\bibcite{wang2024yolov10}{10}
+\bibcite{li2024unimode}{11}
+\bibcite{alrazgan2021slr}{12}
+\bibcite{islam2023environmentdescription}{13}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces ADB-captured intro screen.}}{9}{figure.86}\protected@file@percent }
+\newlabel{fig:adbintro}{{2}{9}{ADB-captured intro screen}{figure.86}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces ADB-captured home screen.}}{9}{figure.88}\protected@file@percent }
+\newlabel{fig:adbhome}{{3}{9}{ADB-captured home screen}{figure.88}{}}
+\@writefile{toc}{\contentsline {section}{References}{9}{section*.111}\protected@file@percent }
+\bibcite{takizawa2017spotreminder}{14}
+\bibcite{lin2017guidingsystem}{15}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Main screen reference mockup from the repository.}}{10}{figure.90}\protected@file@percent }
+\newlabel{fig:mainmock}{{4}{10}{Main screen reference mockup from the repository}{figure.90}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Settings screen reference mockup from the repository.}}{10}{figure.92}\protected@file@percent }
+\newlabel{fig:settingsmock}{{5}{10}{Settings screen reference mockup from the repository}{figure.92}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Debug summary screen reference mockup from the repository.}}{10}{figure.94}\protected@file@percent }
+\newlabel{fig:debugmock}{{6}{10}{Debug summary screen reference mockup from the repository}{figure.94}{}}
+\gdef \@abspage@last{10}

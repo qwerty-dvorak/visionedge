@@ -1,0 +1,42 @@
+BCSE301P – PROJECT COMPONENT DETAILS
+WINTER SEMESTER 2025–26
+Software Engineering
+FINAL REVIEW (30.03.2026 onwards to 15.04.2026)
+• Title of the Project
+• Reg. No. and Name of Team Members (Highlight the Team Leader)
+1. Software Requirement Specification (SRS – IEEE Format)
+2. Software Design Specification (SDS)
+3. Implementation
+• 100% Completion of Project
+• Demonstration of working system
+4. Results and Analysis
+• Results with Graphs
+• Proper interpretation of outputs
+• Outcome – Paper / Patent
+5. Testing
+• Application of Open Source Testing Tool (e.g., Selenium / TestNG / JMeter)
+• Provide tool details and usage
+• Test Case Report with Graphs
+6. References
+FINAL PAPER SUBMISSION WITH PLAGIARISM REPORT
+(To be submitted during the final review period-turnin in report)
+• Plagiarism Report: Less than 12% (Mandatory)
+PAPER FORMAT
+• One Column Format – Minimum 12–14 Pages
+• Two Column Format – Minimum 6–8 Pages
+PAPER STRUCTURE
+• Title
+• Abstract
+• Keywords
+• Introduction
+• Literature Survey
+• Methodology
+• Results and Discussion
+• Conclusion
+• References (10–15 papers from the last 10 years up to 2026)
+IMPORTANT GUIDELINES
+• Final review includes complete evaluation of all components
+• Working demo is mandatory
+• Ensure proper documentation and testing evidence
+• Follow IEEE format strictly
+• Team leader is responsible for final submission and coordination

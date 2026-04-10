@@ -11,7 +11,13 @@
 
 | Total Test Cases | Modules Covered | Priority: High | Priority: Medium | Status |
 |:-:|:-:|:-:|:-:|:-:|
-| 39 | 8 | 25 | 14 | All Pending |
+| 39 | 8 | 25 | 14 | Execution tracked in `docs/VisionEdge_TestReport.md` |
+
+## Validation Notes
+
+- `TC-04` now accepts either the onboarding permission gate or an explicit spoken permission error as a graceful-denial outcome. The current app shows a dedicated onboarding permission screen before Home when camera access is missing.
+- `TC-28` applies to packaged offline builds. Expo dev-client and Metro bootstrap traffic must be excluded from privacy assessment because the development runtime requires a localhost bundle connection.
+- `TC-34` and `TC-35` now accept either a dedicated error screen with `Retry` or a recoverable onboarding-first permission flow, because the current app can route missing-permission recovery through onboarding instead of a separate error page.
 
 ---
 

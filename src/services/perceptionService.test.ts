@@ -46,7 +46,7 @@ import { manipulateAsync } from "expo-image-manipulator";
 import { File } from "expo-file-system";
 import { Image, Platform } from "react-native";
 
-import { PerceptionService } from "./perceptionService";
+import { normalizeFileUri, PerceptionService } from "./perceptionService";
 import { AppSettings } from "../types/app";
 
 const mockedLoadTensorflowModel = loadTensorflowModel as jest.MockedFunction<
@@ -169,6 +169,7 @@ describe("PerceptionService", () => {
         uri: prepared.uri,
         width: prepared.width,
         height: prepared.height,
+        capturedAt: 123456,
       },
       settings,
     );
@@ -176,6 +177,16 @@ describe("PerceptionService", () => {
     expect(mockedManipulateAsync).toHaveBeenCalled();
     expect(run).toHaveBeenCalled();
     expect(result.backend).toBe("local-tflite");
+    expect(result.capturedAt).toBe(123456);
     expect(result.objects[0]?.label).toBe("Chair");
+  });
+
+  it("normalizes raw snapshot paths into file URIs", () => {
+    expect(normalizeFileUri("/data/user/0/com.anonymous.visionedge/cache/frame.jpg")).toBe(
+      "file:///data/user/0/com.anonymous.visionedge/cache/frame.jpg",
+    );
+    expect(normalizeFileUri("file:///data/user/0/com.anonymous.visionedge/cache/frame.jpg")).toBe(
+      "file:///data/user/0/com.anonymous.visionedge/cache/frame.jpg",
+    );
   });
 });

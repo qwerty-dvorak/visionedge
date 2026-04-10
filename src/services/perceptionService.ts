@@ -15,6 +15,7 @@ type PerceptionLogger = (level: "info" | "warning" | "error", message: string) =
 
 const bundledVisionModelPath = "assets/models/yolo26s_float16.tflite";
 const bundledVisionModel = require("../../assets/models/yolo26s_float16.tflite");
+const transientCaptureDirectories = ["visionedge-captures", "Camera", "ImageManipulator"] as const;
 
 export type DetectionInputConfig = {
   width: number;
@@ -30,6 +31,14 @@ function normalizeBundledAssetUrl(url: string) {
   return url
     .replace(/^http:\/\/localhost(?=[:/])/, "http://127.0.0.1")
     .replace(/^https:\/\/localhost(?=[:/])/, "https://127.0.0.1");
+}
+
+export function normalizeFileUri(path: string) {
+  if (path.startsWith("file://")) {
+    return path;
+  }
+
+  return `file://${path}`;
 }
 
 function logPerceptionEvent(
@@ -53,7 +62,27 @@ export async function ensureBase64(input: { base64?: string; uri: string }) {
   if (input.base64) {
     return input.base64;
   }
-  return new File(input.uri).base64();
+  return new File(normalizeFileUri(input.uri)).base64();
+}
+
+export function cleanupTransientArtifacts(logger?: PerceptionLogger) {
+  for (const directoryName of transientCaptureDirectories) {
+    try {
+      const directory = new Directory(Paths.cache, directoryName);
+      if (directory.exists) {
+        directory.delete();
+        logPerceptionEvent(logger, "info", `Deleted transient cache directory ${directory.uri}.`);
+      }
+    } catch (error: unknown) {
+      logPerceptionEvent(
+        logger,
+        "warning",
+        `Failed to delete transient cache directory ${directoryName}: ${
+          error instanceof Error ? error.message : "unknown error"
+        }`,
+      );
+    }
+  }
 }
 
 async function resolveBundledVisionModelSource(logger?: PerceptionLogger) {
@@ -226,8 +255,8 @@ export class PerceptionService {
   };
 
   private inputConfig: DetectionInputConfig = {
-    width: 448,
-    height: 448,
+    width: 320,
+    height: 320,
     dataType: "uint8",
   };
 
@@ -246,8 +275,8 @@ export class PerceptionService {
         logPerceptionEvent(this.logger, "info", `Loading bundled TFLite model with ${delegate} delegate.`);
         const model = await loadTensorflowModel(bundledModelSource, delegate);
         const inputShape = model.inputs?.[0]?.shape || [];
-        const shapeHeight = Number(inputShape[1]) || 448;
-        const shapeWidth = Number(inputShape[2]) || 448;
+        const shapeHeight = Number(inputShape[1]) || 320;
+        const shapeWidth = Number(inputShape[2]) || 320;
         const inputDataType =
           model.inputs?.[0]?.dataType === "float32" ? "float32" : "uint8";
         this.inputConfig = {
@@ -354,6 +383,7 @@ export class PerceptionService {
       uri: string;
       width?: number;
       height?: number;
+      capturedAt?: number;
     },
     settings: AppSettings,
   ): Promise<DetectionResult> {
@@ -384,7 +414,7 @@ export class PerceptionService {
       backend: "local-tflite",
       sceneHash: `tflite-${startedAt.toString(16)}`,
       inferenceTimeMs: Date.now() - startedAt,
-      capturedAt: Date.now(),
+      capturedAt: picture.capturedAt || Date.now(),
       objects: parsed.objects,
     };
 

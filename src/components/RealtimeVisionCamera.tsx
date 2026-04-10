@@ -1,65 +1,48 @@
-import React, { memo, useEffect } from "react";
-import {
-  Camera,
-  runAsync,
-  runAtTargetFps,
-  useCameraDevice,
-  useCameraFormat,
-  useFrameProcessor,
-} from "react-native-vision-camera";
-import { TensorflowModel } from "react-native-fast-tflite";
-import { useRunOnJS } from "react-native-worklets-core";
-import { useResizePlugin } from "vision-camera-resize-plugin";
+import { Directory, Paths } from "expo-file-system";
+import React, { memo, useEffect, useRef } from "react";
+import { Camera, useCameraDevice, useCameraFormat } from "react-native-vision-camera";
 
 import { CAPTURE_INTERVAL_MS } from "../core/cameraConfig";
-import {
-  RealtimeFramePayload,
-} from "../core/realtimeDetection";
-import { extractTfliteDetectionVector } from "../lib/tfliteDetection";
-import { DetectionInputConfig } from "../services/perceptionService";
+import { normalizeFileUri } from "../services/perceptionService";
 
-const FRAME_PROCESSOR_TARGET_FPS = Math.max(1, Math.round(1000 / CAPTURE_INTERVAL_MS));
 const CAMERA_FORMAT_FILTERS = [
   { videoResolution: { width: 1920, height: 1080 } },
   { fps: 30 },
 ] as const;
 
+const snapshotDirectory = new Directory(Paths.cache, "visionedge-captures");
+const snapshotDirectoryPath = snapshotDirectory.uri.replace(/^file:\/\//, "");
+
+export type RealtimeSnapshotPayload = {
+  uri: string;
+  width: number;
+  height: number;
+  capturedAt: number;
+};
+
 type RealtimeVisionCameraProps = {
   active: boolean;
-  inputConfig: DetectionInputConfig | null;
-  model: TensorflowModel | null;
   onCameraError: (message: string) => void;
   onInitialized: () => void;
-  onFrameResult: (payload: RealtimeFramePayload) => void;
+  onSnapshot: (payload: RealtimeSnapshotPayload) => void;
   onPreviewStarted: () => void;
   onPreviewStopped: () => void;
 };
 
 export const RealtimeVisionCamera = memo(function RealtimeVisionCamera({
   active,
-  inputConfig,
-  model,
   onCameraError,
   onInitialized,
-  onFrameResult,
+  onSnapshot,
   onPreviewStarted,
   onPreviewStopped,
 }: RealtimeVisionCameraProps) {
   const device = useCameraDevice("back");
   const format = useCameraFormat(device, [...CAMERA_FORMAT_FILTERS]);
-  const { resize } = useResizePlugin();
-  const emitFrameResult = useRunOnJS(
-    (averageLuma: number, detectionVector: number[], capturedAt: number, inferenceTimeMs: number) => {
-      onFrameResult({
-        averageLuma,
-        detectionVector,
-        capturedAt,
-        inferenceTimeMs,
-      });
-    },
-    [onFrameResult],
-  );
-  const emitCameraError = useRunOnJS(onCameraError, [onCameraError]);
+  const cameraRef = useRef<Camera>(null);
+  const captureTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const captureInFlightRef = useRef(false);
+  const previewStartedRef = useRef(false);
 
   useEffect(() => {
     if (active && !device) {
@@ -67,57 +50,88 @@ export const RealtimeVisionCamera = memo(function RealtimeVisionCamera({
     }
   }, [active, device, onCameraError]);
 
-  const frameProcessor = useFrameProcessor(
-    (frame) => {
-      "worklet";
+  useEffect(() => {
+    let cancelled = false;
 
-      if (!active || !model || !inputConfig) {
+    if (!active) {
+      if (captureTimerRef.current) {
+        clearTimeout(captureTimerRef.current);
+        captureTimerRef.current = null;
+      }
+      captureInFlightRef.current = false;
+      previewStartedRef.current = false;
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    snapshotDirectory.create({
+      idempotent: true,
+      intermediates: true,
+    });
+
+    const scheduleNext = (delayMs: number) => {
+      if (cancelled) {
+        return;
+      }
+      if (captureTimerRef.current) {
+        clearTimeout(captureTimerRef.current);
+      }
+      captureTimerRef.current = setTimeout(() => {
+        void captureSnapshot();
+      }, Math.max(0, delayMs));
+    };
+
+    const captureSnapshot = async () => {
+      if (cancelled || !active || captureInFlightRef.current) {
         return;
       }
 
-      runAtTargetFps(FRAME_PROCESSOR_TARGET_FPS, () => {
-        "worklet";
+      const camera = cameraRef.current;
+      if (!camera) {
+        scheduleNext(CAPTURE_INTERVAL_MS);
+        return;
+      }
+      if (!previewStartedRef.current) {
+        scheduleNext(CAPTURE_INTERVAL_MS);
+        return;
+      }
 
-        runAsync(frame, () => {
-          "worklet";
+      captureInFlightRef.current = true;
+      const startedAt = Date.now();
 
-          try {
-            const capturedAt = Date.now();
-            const inferenceStartedAt = Date.now();
-            const resizedFrame = resize(frame, {
-              scale: {
-                width: inputConfig.width,
-                height: inputConfig.height,
-              },
-              pixelFormat: "rgb",
-              dataType: inputConfig.dataType,
-            });
-            // Avoid iterating a large shared Float32Array in the worklet hot path.
-            const averageLuma = 128;
-            const outputs = model.runSync([resizedFrame]);
-            const detectionVector = extractTfliteDetectionVector(outputs, {
-              inputHeight: inputConfig.height,
-              inputWidth: inputConfig.width,
-            });
-
-            emitFrameResult(
-              averageLuma,
-              detectionVector,
-              capturedAt,
-              Date.now() - inferenceStartedAt,
-            );
-          } catch (error) {
-            const message =
-              typeof error === "object" && error && "message" in error
-                ? String(error.message)
-                : "Realtime frame processing failed.";
-            emitCameraError(message);
-          }
+      try {
+        const snapshot = await camera.takeSnapshot({
+          quality: 70,
+          path: snapshotDirectoryPath,
         });
-      });
-    },
-    [active, emitCameraError, emitFrameResult, inputConfig, model, resize],
-  );
+        onSnapshot({
+          uri: normalizeFileUri(snapshot.path),
+          width: snapshot.width,
+          height: snapshot.height,
+          capturedAt: startedAt,
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Realtime snapshot capture failed.";
+        onCameraError(message);
+      } finally {
+        captureInFlightRef.current = false;
+        scheduleNext(CAPTURE_INTERVAL_MS - (Date.now() - startedAt));
+      }
+    };
+
+    scheduleNext(0);
+
+    return () => {
+      cancelled = true;
+      if (captureTimerRef.current) {
+        clearTimeout(captureTimerRef.current);
+        captureTimerRef.current = null;
+      }
+      captureInFlightRef.current = false;
+    };
+  }, [active, onCameraError, onSnapshot]);
 
   if (!device) {
     return null;
@@ -125,24 +139,30 @@ export const RealtimeVisionCamera = memo(function RealtimeVisionCamera({
 
   return (
     <Camera
+      ref={cameraRef}
       style={{ flex: 1 }}
       device={device}
       format={format}
       isActive={active}
       preview
-      photo={false}
+      photo
       video={false}
       audio={false}
       fps={30}
       pixelFormat="yuv"
-      lowLightBoost={device.supportsLowLightBoost}
       androidPreviewViewType="surface-view"
       resizeMode="cover"
-      frameProcessor={frameProcessor}
       onInitialized={onInitialized}
-      onPreviewStarted={onPreviewStarted}
-      onPreviewStopped={onPreviewStopped}
+      onPreviewStarted={() => {
+        previewStartedRef.current = true;
+        onPreviewStarted();
+      }}
+      onPreviewStopped={() => {
+        previewStartedRef.current = false;
+        onPreviewStopped();
+      }}
       onError={(error) => {
+        previewStartedRef.current = false;
         onCameraError(error.message || "Camera preview failed to start.");
       }}
     />

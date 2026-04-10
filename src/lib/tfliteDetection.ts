@@ -5,9 +5,9 @@ import { getCocoLabel } from "../constants/cocoLabels";
 import { IconKey } from "../constants/theme";
 import { DetectedObject } from "../types/app";
 
-export const DEFAULT_TFLITE_MODEL_INPUT_WIDTH = 448;
-export const DEFAULT_TFLITE_MODEL_INPUT_HEIGHT = 448;
-export const DEFAULT_DETECTION_THRESHOLD = 0.45;
+export const DEFAULT_TFLITE_MODEL_INPUT_WIDTH = 320;
+export const DEFAULT_TFLITE_MODEL_INPUT_HEIGHT = 320;
+export const DEFAULT_DETECTION_THRESHOLD = 0.35;
 export const UNKNOWN_OBJECT_THRESHOLD = 0.12;
 export const DETECTION_VECTOR_STRIDE = 6;
 const MAX_DETECTIONS = 4;

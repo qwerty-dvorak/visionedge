@@ -1,8 +1,9 @@
 import * as Haptics from "expo-haptics";
+import { File } from "expo-file-system";
 import React, {
+  memo,
   startTransition,
   useCallback,
-  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
@@ -18,12 +19,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { TensorflowModel } from "react-native-fast-tflite";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCameraPermission } from "react-native-vision-camera";
 
 import { AppIcon } from "../components/AppIcon";
-import { RealtimeVisionCamera } from "../components/RealtimeVisionCamera";
+import {
+  RealtimeSnapshotPayload,
+  RealtimeVisionCamera,
+} from "../components/RealtimeVisionCamera";
 import {
   Banner,
   MetricCard,
@@ -33,13 +36,13 @@ import {
   SettingToggleRow,
 } from "../components/ui";
 import { colors, radius, shadows, spacing, typography } from "../constants/theme";
-import {
-  buildDetectionResultFromRealtimePayload,
-  RealtimeFramePayload,
-} from "./realtimeDetection";
 import { buildNarrationEvent, describeSettingsChange, formatLatencyLabel } from "../lib/narration";
 import { loadRuntimeModelMetadata } from "../services/modelRuntime";
-import { DetectionInputConfig, PerceptionService } from "../services/perceptionService";
+import {
+  cleanupTransientArtifacts,
+  ensureBase64,
+  PerceptionService,
+} from "../services/perceptionService";
 import { SessionLogEntry, settingsRepository } from "../services/settingsRepository";
 import { createSpeechService } from "../services/speechService";
 import {
@@ -57,8 +60,9 @@ const perceptionService = new PerceptionService();
 const HOT_INFO_LOG_PATTERNS = [
   /^Frame processor sampled /,
   /^VisionCamera inference completed /,
+  /^Narrated scene via /,
 ];
-const REALTIME_UI_SYNC_MS = 500;
+const REALTIME_UI_SYNC_MS = 250;
 
 function shouldPersistAppLog(level: SessionLogEntry["level"], message: string) {
   if (level !== "info") {
@@ -129,6 +133,8 @@ function HomeScreen({
   onOpenSettings,
   onRetry,
 }: HomeScreenProps) {
+  const assistanceBusy = mode === "initializing";
+  const assistanceRunning = mode === "active" || mode === "paused";
   const statusTitle =
     mode === "active"
       ? "Assistance ON"
@@ -198,10 +204,17 @@ function HomeScreen({
         </View>
 
         <PrimaryButton
-          icon={mode === "active" || mode === "paused" ? "stop" : "play"}
-          label={mode === "active" || mode === "paused" ? "Stop Assistance" : "Start Assistance"}
+          icon={assistanceBusy ? "latency" : assistanceRunning ? "stop" : "play"}
+          label={
+            assistanceBusy
+              ? "Starting camera..."
+              : assistanceRunning
+                ? "Stop Assistance"
+                : "Start Assistance"
+          }
           onPress={onStartStop}
-          tone={mode === "active" || mode === "paused" ? "danger" : "primary"}
+          tone={assistanceBusy ? "warning" : assistanceRunning ? "danger" : "primary"}
+          disabled={assistanceBusy}
           accessibilityHint="Double tap to toggle live visual assistance"
         />
 
@@ -254,7 +267,7 @@ function HomeScreen({
   );
 }
 
-function DetectedObjectRow({ item }: { item: DetectedObject }) {
+const DetectedObjectRow = memo(function DetectedObjectRow({ item }: { item: DetectedObject }) {
   return (
     <View style={styles.objectRow}>
       <View style={styles.objectLeft}>
@@ -276,7 +289,7 @@ function DetectedObjectRow({ item }: { item: DetectedObject }) {
       ) : null}
     </View>
   );
-}
+});
 
 type OnboardingProps = {
   onGrant: () => void;
@@ -569,9 +582,48 @@ function SummaryScreen({ mode, latestResult, metrics, logs, models, onBack }: Su
   );
 }
 
+type ErrorScreenProps = {
+  message: string;
+  onRetry: () => void;
+};
+
+type PreparedFramePayload = {
+  base64: string;
+  width: number;
+  height: number;
+  capturedAt: number;
+};
+
+function ErrorScreen({ message, onRetry }: ErrorScreenProps) {
+  return (
+    <ScrollView
+      style={styles.flex}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.onboardingHeader}>
+        <View style={[styles.iconBadge, styles.errorBadge]}>
+          <AppIcon name="error" size={42} color={colors.danger} />
+        </View>
+        <Text style={styles.pageTitle}>Attention Needed</Text>
+        <Text style={styles.onboardingCopy}>{message}</Text>
+      </View>
+
+      <ScreenCard>
+        <Text style={styles.sectionTitle}>Recovery</Text>
+        <Text style={styles.bodyText}>
+          Retry will re-check permissions, restart the camera pipeline, and announce the outcome.
+        </Text>
+        <PrimaryButton icon="retry" label="Retry" onPress={onRetry} />
+      </ScreenCard>
+    </ScrollView>
+  );
+}
+
 export default function VisionEdgeApp() {
   const latestResultRef = useRef<DetectionResult | null>(null);
   const metricsRef = useRef<SessionMetrics>(defaultMetrics);
+  const logsRef = useRef<SessionLogEntry[]>([]);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const cameraReadyRef = useRef(false);
   const modeRef = useRef<AppMode>("idle");
@@ -580,6 +632,10 @@ export default function VisionEdgeApp() {
   const processedFrameCountRef = useRef(0);
   const lastNarrationAtRef = useRef<number | null>(null);
   const isMutedRef = useRef(false);
+  const frameQueueRef = useRef<PreparedFramePayload[]>([]);
+  const frameProcessingRef = useRef(false);
+  const framePreparationCountRef = useRef(0);
+  const captureGenerationRef = useRef(0);
   const uiSyncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastUiSyncAtRef = useRef(0);
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -590,7 +646,7 @@ export default function VisionEdgeApp() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [latestResult, setLatestResult] = useState<DetectionResult | null>(null);
   const [metrics, setMetrics] = useState<SessionMetrics>(defaultMetrics);
-  const [logs, setLogs] = useState<SessionLogEntry[]>([]);
+  const [summaryLogs, setSummaryLogs] = useState<SessionLogEntry[]>([]);
   const [models, setModels] = useState<ModelMetadata[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
@@ -598,11 +654,6 @@ export default function VisionEdgeApp() {
   const [speechReady, setSpeechReady] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
-  const [frameProcessorModel, setFrameProcessorModel] = useState<TensorflowModel | null>(null);
-  const [frameProcessorInputConfig, setFrameProcessorInputConfig] =
-    useState<DetectionInputConfig | null>(null);
-  const deferredLatestResult = useDeferredValue(latestResult);
-  const deferredMetrics = useDeferredValue(metrics);
 
   const geminiConfigured = useMemo(
     () => Boolean(process.env.EXPO_PUBLIC_GEMINI_API_KEY),
@@ -613,6 +664,7 @@ export default function VisionEdgeApp() {
     let mounted = true;
 
     async function bootstrap() {
+      cleanupTransientArtifacts();
       await settingsRepository.init();
       appendLog("info", "Bootstrapping VisionEdge runtime.");
       await settingsRepository.seedDefaultMetadata();
@@ -635,11 +687,10 @@ export default function VisionEdgeApp() {
         return;
       }
 
+      logsRef.current = storedLogs;
       setSettings(storedSettings);
-      setLogs(storedLogs);
+      setSummaryLogs(storedLogs.slice(0, 12));
       setModels(nextModels);
-      setFrameProcessorModel(perceptionService.getTensorflowModel());
-      setFrameProcessorInputConfig(perceptionService.getInputConfig());
       setAppReady(true);
       setSpeechReady(true);
       appendLog("info", "VisionEdge runtime is ready.");
@@ -662,6 +713,8 @@ export default function VisionEdgeApp() {
       setAppState(nextState);
       if (nextState !== "active") {
         updateCameraReady(false);
+        clearQueuedFrames();
+        cleanupTransientArtifacts();
       }
     });
 
@@ -704,6 +757,14 @@ export default function VisionEdgeApp() {
     setMode(nextValue);
   }
 
+  function getCombinedQueueDepth() {
+    const frameDepth =
+      frameQueueRef.current.length +
+      framePreparationCountRef.current +
+      (frameProcessingRef.current ? 1 : 0);
+    return Math.max(frameDepth, speechService.getQueueDepth());
+  }
+
   function scheduleRealtimeUiSync(immediate = false) {
     const flush = () => {
       uiSyncTimeoutRef.current = null;
@@ -736,12 +797,12 @@ export default function VisionEdgeApp() {
     }
   }
 
-  function syncQueueDepth() {
+  function syncQueueDepth(immediate = false) {
     metricsRef.current = {
       ...metricsRef.current,
-      queueDepth: speechService.getQueueDepth(),
+      queueDepth: getCombinedQueueDepth(),
     };
-    scheduleRealtimeUiSync(true);
+    scheduleRealtimeUiSync(immediate);
   }
 
   function appendLog(level: SessionLogEntry["level"], message: string) {
@@ -764,7 +825,10 @@ export default function VisionEdgeApp() {
       message,
       createdAt: Date.now(),
     };
-    setLogs((current) => [entry, ...current].slice(0, 20));
+    logsRef.current = [entry, ...logsRef.current].slice(0, 20);
+    if (activeTabRef.current === "summary") {
+      setSummaryLogs(logsRef.current.slice(0, 12));
+    }
     void settingsRepository.addSessionLog(entry);
   }
 
@@ -798,6 +862,29 @@ export default function VisionEdgeApp() {
     }
   }
 
+  async function deleteTransientFile(uri: string) {
+    try {
+      const file = new File(uri);
+      if (file.exists) {
+        file.delete();
+      }
+    } catch (error: unknown) {
+      appendLog(
+        "warning",
+        `Failed to delete transient file ${uri}: ${
+          error instanceof Error ? error.message : "unknown error"
+        }`,
+      );
+    }
+  }
+
+  function clearQueuedFrames() {
+    frameQueueRef.current.splice(0);
+    frameProcessingRef.current = false;
+    framePreparationCountRef.current = 0;
+    syncQueueDepth(true);
+  }
+
   async function requestCameraAccess() {
     appendLog("info", "Requesting camera permission.");
     if (hasPermission || (await requestPermission())) {
@@ -819,7 +906,7 @@ export default function VisionEdgeApp() {
     return false;
   }
 
-  function handleRealtimeDetection(payload: RealtimeFramePayload) {
+  function commitDetectionResult(result: DetectionResult) {
     if (activeTabRef.current !== "home" || modeRef.current !== "active") {
       return;
     }
@@ -830,20 +917,19 @@ export default function VisionEdgeApp() {
     }
 
     const previousResult = latestResultRef.current;
-    const result = buildDetectionResultFromRealtimePayload(payload);
     const narrationEvent = buildNarrationEvent(
       previousResult,
       result,
       currentSettings,
       lastNarrationAtRef.current,
     );
-    const latency = Date.now() - payload.capturedAt;
+    const latency = Date.now() - result.capturedAt;
     processedFrameCountRef.current += 1;
     latestResultRef.current = result;
     metricsRef.current = {
       ...metricsRef.current,
       framesCaptured: metricsRef.current.framesCaptured + 1,
-      lastCaptureAt: payload.capturedAt,
+      lastCaptureAt: result.capturedAt,
       avgLatencyMs:
         processedFrameCountRef.current === 1
           ? latency
@@ -852,7 +938,7 @@ export default function VisionEdgeApp() {
                 processedFrameCountRef.current,
             ),
       lastInferenceMs: result.inferenceTimeMs,
-      queueDepth: speechService.getQueueDepth(),
+      queueDepth: getCombinedQueueDepth(),
       activeBackend: result.backend,
     };
     setErrorMessage(null);
@@ -888,6 +974,112 @@ export default function VisionEdgeApp() {
     scheduleRealtimeUiSync(sceneChanged || narrationEvent.shouldSpeak);
   }
 
+  async function processQueuedFrames() {
+    if (frameProcessingRef.current) {
+      return;
+    }
+    if (
+      modeRef.current !== "active" ||
+      activeTabRef.current !== "home" ||
+      appStateRef.current !== "active"
+    ) {
+      return;
+    }
+
+    const currentSettings = settingsRef.current;
+    const nextFrame = frameQueueRef.current.shift();
+    if (!currentSettings || !nextFrame) {
+      syncQueueDepth(true);
+      return;
+    }
+
+    frameProcessingRef.current = true;
+    syncQueueDepth(true);
+
+    try {
+      const result = await perceptionService.analyze(
+        {
+          base64: nextFrame.base64,
+          uri: `memory://visionedge-frame-${nextFrame.capturedAt}`,
+          width: nextFrame.width,
+          height: nextFrame.height,
+          capturedAt: nextFrame.capturedAt,
+        },
+        currentSettings,
+      );
+      commitDetectionResult(result);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Realtime frame analysis failed.";
+      handleCameraMountError(message);
+    } finally {
+      frameProcessingRef.current = false;
+      syncQueueDepth(true);
+      if (frameQueueRef.current.length) {
+        void processQueuedFrames();
+      }
+    }
+  }
+
+  async function prepareCapturedFrame(
+    payload: RealtimeSnapshotPayload,
+    generation: number,
+  ) {
+    try {
+      const base64 = await ensureBase64({ uri: payload.uri });
+      await deleteTransientFile(payload.uri);
+
+      if (
+        generation !== captureGenerationRef.current ||
+        (modeRef.current !== "active" && modeRef.current !== "initializing")
+      ) {
+        return;
+      }
+
+      frameQueueRef.current.push({
+        base64,
+        width: payload.width,
+        height: payload.height,
+        capturedAt: payload.capturedAt,
+      });
+      if (frameQueueRef.current.length > 3) {
+        frameQueueRef.current.shift();
+        appendLog("warning", "Dropped an old prepared frame because processing fell behind.");
+      }
+      syncQueueDepth(true);
+      void processQueuedFrames();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to prepare a captured frame.";
+      handleCameraMountError(message);
+    } finally {
+      framePreparationCountRef.current = Math.max(0, framePreparationCountRef.current - 1);
+      syncQueueDepth(true);
+    }
+  }
+
+  function handleSnapshotCaptured(payload: RealtimeSnapshotPayload) {
+    if (modeRef.current !== "active" && modeRef.current !== "initializing") {
+      void deleteTransientFile(payload.uri);
+      return;
+    }
+
+    const pendingFrameCount =
+      frameQueueRef.current.length +
+      framePreparationCountRef.current +
+      (frameProcessingRef.current ? 1 : 0);
+    if (pendingFrameCount >= 4) {
+      void deleteTransientFile(payload.uri);
+      appendLog("warning", "Dropped a newly captured frame because processing fell behind.");
+      syncQueueDepth(true);
+      return;
+    }
+
+    framePreparationCountRef.current += 1;
+    syncQueueDepth(true);
+    void prepareCapturedFrame(payload, captureGenerationRef.current);
+  }
+
   async function startAssistance() {
     if (!hasPermission) {
       const permissionGranted = await requestCameraAccess();
@@ -901,12 +1093,15 @@ export default function VisionEdgeApp() {
     lastNarrationAtRef.current = null;
     latestResultRef.current = null;
     metricsRef.current = { ...defaultMetrics };
+    captureGenerationRef.current += 1;
+    clearQueuedFrames();
+    cleanupTransientArtifacts();
     scheduleRealtimeUiSync(true);
     setCameraVisible(true);
     updateCameraReady(false);
-    syncQueueDepth();
+    syncQueueDepth(true);
     void speak("Visual assistance started.", { interrupt: true, replaceQueue: true });
-    if (!frameProcessorModel || !frameProcessorInputConfig) {
+    if (!perceptionService.isReady()) {
       const message =
         "Bundled local vision model is unavailable. Rebuild the Android app so the TFLite runtime and model are installed.";
       void speak(message, { interrupt: true, replaceQueue: true });
@@ -923,7 +1118,10 @@ export default function VisionEdgeApp() {
     updateMode("idle");
     setCameraVisible(false);
     updateCameraReady(false);
-    syncQueueDepth();
+    captureGenerationRef.current += 1;
+    clearQueuedFrames();
+    cleanupTransientArtifacts();
+    syncQueueDepth(true);
     void speechService.stop();
     void speak("Visual assistance stopped.", { interrupt: true, replaceQueue: true });
     appendLog("info", "Assistance stopped.");
@@ -1008,7 +1206,8 @@ export default function VisionEdgeApp() {
     appendLog("info", "Camera preview is ready.");
     if (modeRef.current === "initializing") {
       updateMode("active");
-      appendLog("info", "Camera ready. VisionCamera frame processor is active.");
+      appendLog("info", "Camera ready. Snapshot capture loop is active.");
+      void processQueuedFrames();
     }
   }
 
@@ -1022,6 +1221,8 @@ export default function VisionEdgeApp() {
     setErrorMessage(message);
     updateMode("error");
     setCameraVisible(false);
+    captureGenerationRef.current += 1;
+    clearQueuedFrames();
     appendLog("error", `Camera runtime failed: ${message}`);
     void speak(message, { interrupt: true, replaceQueue: true });
   }
@@ -1029,6 +1230,9 @@ export default function VisionEdgeApp() {
   async function navigateToTab(nextTab: AppTab, announcement?: string) {
     activeTabRef.current = nextTab;
     setActiveTab(nextTab);
+    if (nextTab === "summary") {
+      setSummaryLogs(logsRef.current.slice(0, 12));
+    }
     if (nextTab !== "home") {
       updateCameraReady(false);
     }
@@ -1038,8 +1242,8 @@ export default function VisionEdgeApp() {
     appendLog("info", `Navigated to ${nextTab}.`);
   }
 
-  const handleRealtimeDetectionStable = useCallback((payload: RealtimeFramePayload) => {
-    handleRealtimeDetection(payload);
+  const handleSnapshotCapturedStable = useCallback((payload: RealtimeSnapshotPayload) => {
+    handleSnapshotCaptured(payload);
   }, []);
   const handleCameraMountErrorStable = useCallback((message: string) => {
     handleCameraMountError(message);
@@ -1072,7 +1276,7 @@ export default function VisionEdgeApp() {
     );
   }
 
-  const showOnboarding = !onboardingComplete;
+  const showOnboarding = !onboardingComplete && mode !== "error";
   const isCameraStreamActive =
     cameraVisible &&
     activeTab === "home" &&
@@ -1087,15 +1291,13 @@ export default function VisionEdgeApp() {
         <View style={styles.cameraFrame}>
           <RealtimeVisionCamera
             active={isCameraStreamActive}
-            model={frameProcessorModel}
-            inputConfig={frameProcessorInputConfig}
             onInitialized={handleCameraInitializedStable}
-            onFrameResult={handleRealtimeDetectionStable}
+            onSnapshot={handleSnapshotCapturedStable}
             onCameraError={handleCameraMountErrorStable}
             onPreviewStarted={handleCameraReadyStable}
             onPreviewStopped={handleCameraStoppedStable}
           />
-          <View style={styles.cameraOverlay}>
+          <View style={styles.cameraOverlay} pointerEvents="none">
             <Text style={styles.cameraOverlayText}>
               {!cameraReady
                 ? "Waiting for camera preview"
@@ -1109,6 +1311,8 @@ export default function VisionEdgeApp() {
 
       {showOnboarding ? (
         <OnboardingScreen onGrant={requestCameraAccess} permissionGranted={hasPermission} />
+      ) : mode === "error" && errorMessage ? (
+        <ErrorScreen message={errorMessage} onRetry={handleRetry} />
       ) : activeTab === "settings" ? (
         <SettingsScreen
           settings={settings}
@@ -1119,9 +1323,9 @@ export default function VisionEdgeApp() {
       ) : activeTab === "summary" ? (
         <SummaryScreen
           mode={mode}
-          latestResult={deferredLatestResult}
-          metrics={deferredMetrics}
-          logs={logs}
+          latestResult={latestResult}
+          metrics={metrics}
+          logs={summaryLogs}
           models={models}
           onBack={navigateHome}
         />
@@ -1130,8 +1334,8 @@ export default function VisionEdgeApp() {
           mode={mode}
           permissionGranted={hasPermission}
           isMuted={isMuted}
-          latestResult={deferredLatestResult}
-          metrics={deferredMetrics}
+          latestResult={latestResult}
+          metrics={metrics}
           errorMessage={errorMessage}
           onStartStop={toggleAssistance}
           onPauseResume={togglePause}
@@ -1319,6 +1523,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     ...shadows.floating,
+  },
+  errorBadge: {
+    borderColor: colors.danger,
+    shadowColor: colors.danger,
   },
   onboardingCopy: {
     ...typography.body,

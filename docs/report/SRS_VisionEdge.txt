@@ -1,0 +1,683 @@
+Software Requirements
+Specification
+for
+VisionEdge: Latency-Optimized Local Perception &
+TTS Pipeline
+Version 1.0
+
+Prepared by:
+Madhav Juneja
+Ayan Gattani
+Adheesh Garg
+
+23BCT0111 madhav.juneja2023@vitstudent.ac.in
+23BCT0059
+ayan.gattani2023@vitstudent.ac.in
+23BCT0122
+adheesh.garg2023@vitstudent.ac.in
+
+Instructor: Dr. Swarnalatha P
+Course: Software Engineering Lab
+Lab Section: L23+L24
+Date: 14th January, 2026
+
+Copyright © 1999 by Karl E. Wiegers. Permission is granted to use, modify, and distribute this document.
+
+Software Requirements Specification for VisionEdge
+
+Page ii
+
+Table of Contents
+Table of Contents .............................................................................................................................2
+Revision History ...............................................................................................................................2
+1. Introduction..................................................................................................................................1
+1.1 Purpose..................................................................................................................................... 1
+1.2 Document Conventions ............................................................................................................. 1
+1.3 Intended Audience and Reading Suggestions ............................................................................ 1
+1.4 Product Scope ........................................................................................................................... 1
+1.5 References ................................................................................................................................ 1
+2. Overall Description ......................................................................................................................1
+2.1 Product Perspective .................................................................................................................. 2
+2.2 Product Functions ..................................................................................................................... 2
+2.3 User Classes and Characteristics ............................................................................................... 2
+2.4 Operating Environment ............................................................................................................. 2
+2.5 Design and Implementation Constraints .................................................................................... 2
+2.6 User Documentation ................................................................................................................. 2
+2.7 Assumptions and Dependencies ................................................................................................ 3
+3. External Interface Requirements ...............................................................................................3
+3.1 User Interfaces .......................................................................................................................... 3
+3.2 Hardware Interfaces .................................................................................................................. 3
+3.3 Software Interfaces ................................................................................................................... 3
+3.4 Communications Interfaces ....................................................................................................... 3
+4. System Features ...........................................................................................................................3
+4.1 System Feature 1 ...................................................................................................................... 4
+4.2 System Feature 2 (and so on) .................................................................................................... 4
+5. Other Nonfunctional Requirements ...........................................................................................7
+5.1 Performance Requirements ....................................................................................................... 4
+5.2 Safety Requirements ................................................................................................................. 5
+5.3 Security Requirements .............................................................................................................. 5
+5.4 Software Quality Attributes ....................................................................................................... 5
+5.5 Business Rules .......................................................................................................................... 5
+6. Other Requirements ....................................................................................................................5
+Appendix A: Glossary......................................................................................................................5
+Appendix B: Analysis Models .........................................................................................................5
+Appendix C: To Be Determined List ..............................................................................................6
+
+Revision History
+Author Name
+
+Date
+
+Description
+
+Version
+
+Madhav Juneja
+
+14/1/26
+
+Initial draft of Software Requirements
+Specification covering system overview,
+functional and non-functional requirements
+
+1.0
+
+Software Requirements Specification for VisonEdge
+
+Page 1
+
+1. Introduction
+1.1 Purpose
+This Software Requirements Specification (SRS) document describes the software requirements for
+VisionEdge, an offline, mobile-based assistive application designed to provide real-time visual
+perception and audio feedback for visually impaired users. This document defines the functional
+and non-functional requirements of the system and specifies the scope, behavior, and constraints of
+the software.
+The purpose of this SRS is to serve as a formal reference for stakeholders, including academic
+evaluators, developers, and project team members, by providing a clear and unambiguous
+description of the system requirements. This document will be used as a basis for system design,
+implementation, testing, and evaluation during the Software Engineering course.
+
+1.2 Document Conventions
+This document follows standard IEEE Software Requirements Specification (SRS) conventions.
+Section and subsection numbering adhere to the structure defined in the SRS template.
+Requirements are stated using clear and precise language, with functional requirements expressed
+using the term “shall” to indicate mandatory system behavior.
+
+Bullet points and tables are used where appropriate to improve clarity and readability. Acronyms
+and abbreviations are expanded upon first use and defined in a separate glossary. All requirements
+are written to be concise, verifiable, and necessary.
+
+1.3 Intended Audience and Reading Suggestions
+This document is intended for the following audiences:
+•
+•
+•
+
+Course instructors and teaching assistants responsible for evaluating the project
+Developers and project team members involved in system design and implementation
+Testers and reviewers responsible for validation and verification activities
+
+Software Requirements Specification for VisonEdge
+
+Page 2
+
+Readers are advised to begin with Section 1 to understand the purpose and scope of the system.
+Section 2 provides a high-level overview of the product and its operating environment. Section 3
+describes the external interfaces of the system. Subsequent sections define detailed system features
+and non-functional requirements.
+
+1.4 Product Scope
+VisionEdge is a software system that converts a smartphone into a real-time assistive visual aid.
+The system captures live video from the device camera, performs on-device visual perception to
+detect objects and scene elements, and generates immediate spoken feedback using a lightweight
+neural Text-to-Speech (TTS) pipeline.
+
+The primary goals of VisionEdge are to:
+•
+•
+•
+•
+
+Enable real-time environmental awareness for visually impaired users
+Ensure low-latency response suitable for continuous use
+Preserve user privacy by operating entirely offline
+Provide an energy-efficient and accessible mobile solution
+
+VisionEdge is intended for everyday use in indoor and outdoor environments and does not rely on
+cloud-based processing or internet connectivity.
+
+1.5 References
+The following documents and resources are referenced in the preparation of this SRS:
+•
+•
+•
+
+IEEE Std 830-1998, IEEE Recommended Practice for Software Requirements Specifications
+Course materials provided as part of the Software Engineering curriculum
+Technical documentation related to mobile application development and on-device machine
+learning
+
+Software Requirements Specification for VisonEdge
+
+Page 3
+
+2. Overall Description
+2.1 Product Perspective
+VisionEdge is a new, standalone mobile application developed as part of a Software Engineering
+academic project. It is designed as an independent assistive system and does not replace or extend
+any existing commercial product. The system operates entirely on a smartphone and performs all
+processing locally on the device.
+
+From a system perspective, VisionEdge consists of multiple interconnected modules, including a
+camera input module, a vision perception module, a text generation component, a neural text-tospeech (TTS) pipeline, and a user interaction layer. These components work together to transform
+real-time visual input into spoken audio feedback. The system relies on the underlying mobile
+operating system for access to hardware resources such as the camera, audio output, and processing
+units.
+
+VisionEdge functions as a self-contained application and does not require interaction with external
+cloud services or network-based systems during normal operation.
+
+2.2 Product Functions
+At a high level, the VisionEdge system provides the following functions:
+•
+•
+•
+•
+•
+•
+
+Capture real-time video input from the smartphone camera
+Detect objects and scene elements from captured video frames
+Generate textual descriptions from detected visual information
+Convert textual descriptions into spoken audio using an offline TTS pipeline
+Deliver low-latency audio feedback to the user
+Support accessible user interaction suitable for visually impaired users
+
+Detailed functional requirements are specified in later sections of this document.
+
+Software Requirements Specification for VisonEdge
+
+Page 4
+
+2.3 User Classes and Characteristics
+The primary user class for the VisionEdge system is:
+•
+
+Visually Impaired Users:
+Users with partial or complete visual impairment who require auditory assistance to
+understand their surrounding environment. These users may have limited ability to interact
+with complex graphical interfaces and therefore require simple, accessible, and audio-driven
+interaction mechanisms.
+
+Secondary user classes include:
+•
+
+Developers and Testers:
+Individuals involved in developing, testing, and evaluating the system. This user class
+interacts with the system primarily during development and testing phases and is not the
+target end-user of the application.
+
+The system is primarily optimized to satisfy the needs of visually impaired users.
+
+2.4 Operating Environment
+VisionEdge operates within the following environment:
+•
+•
+•
+•
+
+Smartphone devices equipped with a camera, speaker, and touch interface
+Mobile operating systems supporting on-device machine learning inference
+On-device processing units such as CPU, GPU, or Neural Processing Units (NPUs)
+Offline operation without dependency on internet connectivity
+
+The system must coexist with other applications on the device without significantly degrading
+overall device performance or user experience.
+
+Software Requirements Specification for VisonEdge
+
+Page 5
+
+2.5 Design and Implementation Constraints
+The VisionEdge system is subject to the following constraints:
+•
+•
+•
+•
+•
+
+The system must operate entirely offline, without reliance on cloud-based services
+Processing must be optimized to meet low-latency requirements on mobile hardware
+Vision and TTS models must be lightweight to reduce memory and battery usage
+Development must follow standard software engineering practices as required by the course
+The system must ensure accessibility and ease of use for visually impaired users
+
+These constraints limit the choice of technologies, models, and design approaches used in system
+implementation.
+
+2.6 User Documentation
+The following user documentation will be provided with the VisionEdge system:
+•
+•
+•
+
+A brief user guide describing application usage and basic interactions
+In-application audio instructions to assist users during operation
+Developer documentation describing system architecture and module behavior
+
+Documentation will be designed to be concise and accessible.
+
+2.7 Assumptions and Dependencies
+The VisionEdge project is based on the following assumptions and dependencies:
+•
+•
+•
+•
+•
+
+Users possess a smartphone with sufficient computational capability to support on-device
+inference
+The mobile operating system provides stable APIs for camera access and audio output
+Adequate lighting conditions are available for effective visual perception
+Pre-trained and optimized machine learning models perform reliably across common
+environments
+System performance may vary depending on device hardware specifications
+
+Software Requirements Specification for VisonEdge
+
+Page 6
+
+3. External Interface Requirements
+3.1 User Interfaces
+The VisionEdge system provides a mobile user interface designed with accessibility as the primary
+focus. The interface minimizes visual dependency and relies heavily on audio feedback to
+communicate system status and results to the user.
+
+User interaction is supported through simple touch-based controls and large interface elements.
+Audio cues are used to confirm user actions, indicate errors, and provide feedback. The interface
+avoids complex layouts and ensures consistent interaction patterns to improve usability for visually
+impaired users.
+
+3.2 Hardware Interfaces
+VisionEdge interfaces with the following hardware components of the smartphone:
+•
+•
+•
+
+Camera: Used to capture real-time video input for visual perception
+Speaker or Headphones: Used to deliver synthesized audio output
+Touchscreen: Used for basic user interaction and control
+
+All hardware interactions are managed through standard mobile operating system interfaces.
+
+3.3 Software Interfaces
+The system interfaces with internal software components and system-level services, including:
+•
+•
+•
+
+Mobile operating system APIs for camera access, audio playback, and resource management
+On-device machine learning inference frameworks for executing vision and TTS models
+Application-level modules for vision processing, text generation, and audio synthesis
+
+All software interactions occur locally on the device, and no external online software services are
+required
+
+Software Requirements Specification for VisonEdge
+
+Page 7
+
+3.4 Communications Interfaces
+VisionEdge does not require network-based communication interfaces for normal operation. The
+system does not transmit or receive data over the internet and does not depend on communication
+protocols such as HTTP or FTP.
+
+Optional communication interfaces may be used only for application installation, updates, or
+debugging purposes, but these are not part of the core system functionality.
+
+4. System Features
+This section describes the major system features provided by VisionEdge. Each feature represents a
+core service offered by the system and is defined with its description, priority, stimulus/response
+behavior, and detailed functional requirements.
+
+4.1 Real-Time Visual Perception
+4.1.1 Description and Priority
+This feature enables the system to capture live visual input from the smartphone camera and analyze
+it to detect objects and scene elements in the user’s environment. It forms the foundation of the
+assistive functionality provided by VisionEdge.
+
+Priority: High
+
+4.1.2 Stimulus/Response Sequences
+•
+•
+
+Stimulus: The user launches the application and activates visual assistance.
+Response:
+
+Software Requirements Specification for VisonEdge
+
+Page 8
+
+1. The system initializes the camera.
+2. The system continuously captures video frames.
+3. The system processes the frames using on-device vision models to detect objects and
+scene elements.
+
+4.1.3 Functional Requirements
+•
+•
+•
+•
+
+REQ-1: The system shall activate the smartphone camera when visual assistance is enabled.
+REQ-2: The system shall capture video frames in real time for analysis.
+REQ-3: The system shall perform object and scene detection using on-device vision
+models.
+REQ-4: The system shall handle camera access errors and notify the user through audio
+feedback.
+
+4.2 Textual Description Generation
+
+4.2.1 Description and Priority
+This feature converts detected visual information into concise textual descriptions that can be used
+for audio narration. The descriptions are designed to be meaningful, context-aware, and suitable for
+real-time assistance.
+
+Priority: High
+
+4.2.2 Stimulus/Response Sequences
+•
+•
+
+Stimulus: Objects or scene elements are detected in the visual input.
+Response:
+1. The system extracts relevant information from detection results.
+2. The system generates a textual description of the environment.
+3. The generated text is forwarded to the TTS module.
+
+Software Requirements Specification for VisonEdge
+
+Page 9
+
+4.2.3 Functional Requirements
+•
+•
+•
+
+REQ-5: The system shall convert detected objects and scenes into textual descriptions.
+REQ-6: The system shall generate concise and understandable descriptions suitable for
+audio output.
+REQ-7: The system shall update descriptions dynamically as the visual scene changes.
+
+4.3 Offline Text-to-Speech (TTS) Output
+4.3.1 Description and Priority
+This feature enables the system to convert textual descriptions into spoken audio using an offline
+neural text-to-speech pipeline. It ensures that audio feedback is generated without internet
+connectivity.
+
+Priority: High
+
+4.3.2 Stimulus/Response Sequences
+•
+•
+
+Stimulus: A textual description is generated by the system.
+Response:
+1. The system processes the text using the TTS module.
+2. The system generates audio output.
+3. The audio is played through the device speaker or connected audio output.
+
+4.3.3 Functional Requirements
+•
+•
+•
+
+REQ-8: The system shall generate speech output from textual descriptions using an offline
+TTS model.
+REQ-9: The system shall deliver audio output through the device speaker or connected
+audio devices.
+REQ-10: The system shall notify the user if audio output fails.
+
+Software Requirements Specification for VisonEdge
+
+Page 10
+
+4.4 Low-Latency Processing and Feedback
+4.4.1 Description and Priority
+This feature ensures that the time taken from visual input capture to audio output is minimized to
+support real-time assistance. Low latency is critical for usability and safety.
+
+Priority: High
+
+4.4.2 Stimulus/Response Sequences
+•
+•
+
+Stimulus: Continuous visual input is processed by the system.
+Response:
+1. The system processes vision and TTS pipelines efficiently.
+2. The system delivers timely audio feedback with minimal delay.
+
+4.4.3 Functional Requirements
+•
+•
+
+REQ-11: The system shall optimize processing pipelines to minimize end-to-end latency.
+REQ-12: The system shall prioritize real-time feedback over non-essential processing tasks.
+
+4.5 Accessibility and User Control
+4.5.1 Description and Priority
+This feature provides accessible interaction mechanisms that allow visually impaired users to easily
+control system operation, such as starting or stopping visual assistance.
+
+Priority: Medium
+4.5.2 Stimulus/Response Sequences
+•
+•
+
+Stimulus: The user performs an interaction to control system operation.
+Response:
+1. The system recognizes the user input.
+2. The system performs the requested action.
+
+Software Requirements Specification for VisonEdge
+
+Page 11
+
+3. The system confirms the action using audio feedback.
+
+4.5.3 Functional Requirements
+•
+•
+•
+
+REQ-13: The system shall provide simple interaction mechanisms suitable for visually
+impaired users.
+REQ-14: The system shall allow users to start and stop visual assistance.
+REQ-15: The system shall provide audio confirmation for user actions.
+
+5. Other Nonfunctional Requirements
+This section describes the nonfunctional requirements that define the performance, safety, security,
+and quality attributes of the VisionEdge system. These requirements specify constraints and
+characteristics that affect system behavior and user experience but are not directly related to specific
+system features.
+
+5.1 Performance Requirements
+The VisionEdge system is required to meet the following performance requirements to ensure realtime and reliable operation:
+•
+•
+•
+•
+
+PERF-1: The system shall ensure an end-to-end latency of less than 2 seconds from video
+capture to audio output under normal operating conditions.
+PERF-2: The system shall aim to deliver audio feedback within 1 second on supported
+devices with adequate hardware capabilities.
+PERF-3: The system shall process visual input continuously without noticeable
+interruptions during normal use.
+PERF-4: The system shall limit excessive CPU, memory, and battery consumption to allow
+sustained usage on mobile devices.
+
+5.2 Safety Requirements
+The VisionEdge system is designed to assist users without causing physical or operational harm.
+The following safety requirements apply:
+•
+
+SAFE-1: The system shall provide clear and timely audio feedback to reduce the risk of user
+confusion.
+
+Software Requirements Specification for VisonEdge
+
+•
+•
+
+Page 12
+
+SAFE-2: The system shall notify the user if critical system components such as the camera
+or audio output become unavailable.
+SAFE-3: The system shall avoid generating misleading or unsafe descriptions when visual
+information is uncertain.
+
+VisionEdge is intended as an assistive tool and does not replace human judgment. Users are
+expected to remain aware of their surroundings while using the system.
+
+5.3 Security Requirements
+The VisionEdge system must preserve user privacy and ensure secure operation:
+•
+•
+•
+
+SEC-1: The system shall operate entirely offline and shall not transmit visual or audio data
+to external servers.
+SEC-2: The system shall not store sensitive visual data unless explicitly required for system
+operation.
+SEC-3: The system shall follow secure coding practices to prevent unauthorized access to
+system resources.
+
+By performing all processing locally, VisionEdge minimizes exposure to security and privacy risks.
+
+5.4 Software Quality Attributes
+The VisionEdge system shall exhibit the following software quality attributes:
+5.4.1 Usability
+•
+•
+
+The system shall provide an accessible interface optimized for visually impaired users.
+Audio feedback shall be clear, concise, and easy to understand.
+
+5.4.2 Reliability
+•
+•
+
+The system shall continue operating reliably under normal usage conditions.
+The system shall handle errors gracefully and notify the user when failures occur.
+
+Software Requirements Specification for VisonEdge
+
+Page 13
+
+5.4.3 Maintainability
+•
+•
+
+The system shall be designed using modular components to allow easy updates and
+enhancements.
+Code and system components shall follow standard documentation and coding practices.
+
+5.4.4 Portability
+•
+
+The system shall be deployable on a range of modern smartphones supporting on-device
+machine learning.
+
+5.5 Business Rules
+The following business rules govern the operation of the VisionEdge system:
+•
+•
+•
+
+BR-1: The system shall provide assistive functionality exclusively for accessibility
+purposes.
+BR-2: The system shall prioritize user privacy and offline operation over feature expansion
+that requires cloud connectivity.
+BR-3: Only authorized users of the device shall be able to operate the application.
+
+6. Other Requirements
+This section specifies additional requirements for the VisionEdge system that are not covered
+elsewhere in this document but are relevant to the successful development and deployment of the
+software.
+
+6.1 Accessibility Requirements
+•
+•
+•
+
+The system shall be designed to support accessibility needs of visually impaired users.
+Audio-based guidance and feedback shall be provided for all primary system operations.
+The system shall minimize reliance on visual interaction wherever possible.
+
+Software Requirements Specification for VisonEdge
+
+Page 14
+
+6.2 Data Management Requirements
+•
+•
+
+The system shall process visual data in real time without persistent storage of raw video
+frames.
+Temporary data generated during processing shall be discarded after use.
+
+6.3 Legal and Ethical Requirements
+•
+•
+
+The system shall comply with applicable data privacy and ethical guidelines related to
+assistive technologies.
+User data shall not be shared with third parties.
+
+6.4 Reuse and Extensibility Requirements
+•
+•
+
+The system architecture shall support future enhancements such as additional perception
+modules or language support.
+Components shall be designed to allow reuse in related assistive applications.
+
+Appendix A: Glossary
+Term
+Description
+Assistive Technology Technology designed to support users with disabilities
+Edge AI
+Execution of AI models directly on a device without cloud dependency
+TTS
+Text-to-Speech
+Latency
+Time delay between input capture and output generation
+On-device Processing Computation performed locally on a mobile device
+SRS
+Software Requirements Specification
+
+Software Requirements Specification for VisonEdge
+
+Page 15
+
+Appendix B: Analysis Models
+Analysis models such as high-level architecture diagrams, data flow diagrams, and use case
+diagrams may be developed during the system design phase to further illustrate system behavior and
+component interactions.
+
+Appendix C: To Be Determined List
+The following items are identified as To Be Determined (TBD) and will be finalized during later
+stages of development:
+•
+•
+•
+
+TBD-1: Exact vision model architecture and parameters
+TBD-2: Final TTS model selection and configuration
+TBD-3: Detailed performance benchmarks across different smartphone devices
+
+
